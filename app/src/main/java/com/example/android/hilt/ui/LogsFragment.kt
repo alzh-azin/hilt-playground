@@ -22,24 +22,42 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.example.android.hilt.LogApplication
 import com.example.android.hilt.R
 import com.example.android.hilt.data.Log
+import com.example.android.hilt.data.LoggerDataSource
 import com.example.android.hilt.data.LoggerLocalDataSource
+import com.example.android.hilt.di.InMemoryLogger
 import com.example.android.hilt.util.DateFormatter
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 /**
  * Fragment that displays the database logs.
  */
+
+data class TestData(val data: Int = 5)
+
+@AndroidEntryPoint
 class LogsFragment : Fragment() {
 
-    private lateinit var logger: LoggerLocalDataSource
-    private lateinit var dateFormatter: DateFormatter
+    @InMemoryLogger
+    @Inject
+    lateinit var logger: LoggerDataSource
+
+    @Inject
+    lateinit var dateFormatter: DateFormatter
+
+    @Inject
+    lateinit var number: TestData
 
     private lateinit var recyclerView: RecyclerView
+    private lateinit var button: Button
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,18 +71,13 @@ class LogsFragment : Fragment() {
         recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view).apply {
             setHasFixedSize(true)
         }
-    }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
+        button = view.findViewById<Button>(R.id.my_button)
 
-        populateFields(context)
-    }
+        button.setOnClickListener {
+            Toast.makeText(requireActivity(), "${number}", Toast.LENGTH_SHORT).show()
+        }
 
-    private fun populateFields(context: Context) {
-        logger = (context.applicationContext as LogApplication).serviceLocator.loggerLocalDataSource
-        dateFormatter =
-            (context.applicationContext as LogApplication).serviceLocator.provideDateFormatter()
     }
 
     override fun onResume() {
